@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/JW31254/nextline/skills/nextline-scripts/schema/nextline-script.schema.json",
+  "title": "NextLine script file",
+  "description": "A file you can import into NextLine. A bare array of scripts, or a single script object, is also accepted by the app.",
+  "type": "object",
+  "required": ["scripts"],
+  "additionalProperties": true,
+  "properties": {
+    "scripts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/script" }
+    }
+  },
+  "$defs": {
+    "afterKey": {
+      "type": "string",
+      "description": "Key pressed after the step has been typed.",
+      "default": "none",
+      "enum": [
+        "none",
+        "enter",
+        "tab",
+        "shiftTab",
+        "escape",
+        "space",
+        "backspace",
+        "delete",
+        "arrowUp",
+        "arrowDown",
+        "arrowLeft",
+        "arrowRight",
+        "ctrlEnter",
+        "shiftEnter"
+      ]
+    },
+    "step": {
+      "type": "object",
+      "required": ["body"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "description": "Optional. Replaced with a fresh ID on import." },
+        "body": { "type": "string", "description": "Exact text to type. A newline types Shift+Enter by default; a tab character types Tab." },
+        "afterKey": { "$ref": "#/$defs/afterKey" },
+        "note": { "type": "string", "description": "Private presenter note. Never typed." },
+        "delayMs": { "type": "integer", "minimum": 0, "maximum": 60000, "description": "Extra wait before this step starts." }
+      }
+    },
+    "script": {
+      "type": "object",
+      "required": ["title", "steps"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "description": "Optional. Replaced with a fresh ID on import." },
+        "title": { "type": "string", "minLength": 1 },
+        "category": { "type": "string", "description": "Sidebar group. Defaults to \"Imported\"." },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/step" }
+        }
+      }
+    }
+  }
+}

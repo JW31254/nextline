@@ -1,0 +1,75 @@
+name: Release
+
+# Push a tag such as v0.3.0 to publish a release. The tag must match the version in Cargo.toml.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check tag matches Cargo.toml
+        id: ver
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}".TrimStart('v')
+          $cargo = (Select-String -Path Cargo.toml -Pattern '^version\s*=\s*"([^"]+)"').Matches[0].Groups[1].Value
+          if ($tag -ne $cargo) { throw "Tag v$tag does not match Cargo.toml version $cargo" }
+          "version=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Strip build-machine paths from the binary
+        shell: pwsh
+        run: |
+          $flags = "--remap-path-prefix=$env:GITHUB_WORKSPACE=nextline --remap-path-prefix=$env:USERPROFILE\.cargo=cargo --remap-path-prefix=$env:USERPROFILE\.rustup=rustup"
+          "RUSTFLAGS=$flags" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Test
+        run: cargo test --locked
+
+      - name: Build
+        run: cargo build --release --locked
+
+      - name: Package
+        id: pack
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.ver.outputs.version }}"
+          $dir = "NextLine-$ver-win-x64"
+          New-Item -ItemType Directory $dir | Out-Null
+          Copy-Item target/release/nextline.exe "$dir/NextLine.exe"
+          Copy-Item README.md, LICENSE "$dir/"
+          Copy-Item -Recurse skills "$dir/skills"
+          Compress-Archive -Path $dir -DestinationPath "$dir.zip"
+          $hash = (Get-FileHash "$dir.zip" -Algorithm SHA256).Hash
+          "zip=$dir.zip" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "sha=$hash" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Release notes from CHANGELOG
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.ver.outputs.version }}"
+          $text = Get-Content CHANGELOG.md -Raw
+          $m = [regex]::Match($text, "(?ms)^## \[$([regex]::Escape($ver))\][^\r\n]*\r?\n(.*?)(?=^## \[|\z)")
+          if (-not $m.Success) { throw "CHANGELOG.md has no section for $ver" }
+          $notes = $m.Groups[1].Value.Trim() + "`n`nSHA-256: ``${{ steps.pack.outputs.sha }}``"
+          $notes += "`n`nWindows may show a SmartScreen prompt because the app isn't code-signed yet: choose **More info > Run anyway**."
+          Set-Content -Path release-notes.md -Value $notes -Encoding utf8
+
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" "${{ steps.pack.outputs.zip }}" `
+            --title "NextLine ${{ steps.ver.outputs.version }}" `
+            --notes-file release-notes.md `
+            --verify-tag

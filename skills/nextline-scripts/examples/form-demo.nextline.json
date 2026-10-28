@@ -1,0 +1,14 @@
+{
+  "scripts": [
+    {
+      "title": "Lead intake form",
+      "category": "Forms",
+      "steps": [
+        { "body": "Avery Stone", "afterKey": "tab", "note": "Click into the first field before starting." },
+        { "body": "Harbor & Pine Co.", "afterKey": "tab" },
+        { "body": "avery.stone@example.com", "afterKey": "tab" },
+        { "body": "We run a 500-seat contact centre and want a guided demo of customer service automation.", "afterKey": "none", "note": "Last field: press the submit button by hand." }
+      ]
+    }
+  ]
+}

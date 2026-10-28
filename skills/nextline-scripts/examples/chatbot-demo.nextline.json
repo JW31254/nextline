@@ -1,0 +1,29 @@
+{
+  "scripts": [
+    {
+      "title": "Support assistant: order tracking",
+      "category": "Chatbots",
+      "steps": [
+        {
+          "body": "Hi! My order #48213 hasn't arrived and it was due yesterday. Can you check where it is?",
+          "afterKey": "enter",
+          "note": "Open with a realistic problem. Wait for the assistant to look up the order."
+        },
+        {
+          "body": "Can you also upgrade me to express shipping for the replacement?",
+          "afterKey": "enter",
+          "note": "Follow-up action. Point out the confirmation step."
+        },
+        {
+          "body": "Great. Please email me the confirmation and summarise what we agreed.",
+          "afterKey": "enter",
+          "note": "Close the loop: show the generated summary."
+        },
+        {
+          "body": "Thanks, that's all I needed!",
+          "afterKey": "enter"
+        }
+      ]
+    }
+  ]
+}
