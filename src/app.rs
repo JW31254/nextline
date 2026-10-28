@@ -518,8 +518,8 @@ impl App {
     // ---------------------------------------------------------------- full window
 
     /// Slim "update available" strip under the title bar. Never shown while typing or in presenter mode.
-    fn update_banner(&mut self, ui: &mut egui::Ui, p: &Palette, _data: &AppData) {
-        let Some(info) = self.core.available_update() else { return };
+    fn update_banner(&mut self, ui: &mut egui::Ui, p: &Palette, data: &mut AppData) {
+        let Some(info) = self.core.available_update(&data.settings.skipped_version) else { return };
         if self.core.is_busy() || self.update_dismissed.as_deref() == Some(info.version.as_str()) {
             return;
         }
@@ -539,7 +539,8 @@ impl App {
                         ui.ctx().open_url(egui::OpenUrl::new_tab(info.url.clone()));
                     }
                     if ui.link("Skip this version").clicked() {
-                        self.core.skip_update(&info.version);
+                        data.settings.skipped_version = info.version.clone();
+                        self.core.mark_dirty();
                     }
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         if icon_button(ui, icons::X, "Hide until next launch").clicked() {

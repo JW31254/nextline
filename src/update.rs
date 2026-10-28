@@ -116,6 +116,11 @@ pub fn now_unix() -> u64 {
     std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)
 }
 
+/// Hides an update the user chose to skip.
+pub fn unless_skipped(info: Option<UpdateInfo>, skipped_version: &str) -> Option<UpdateInfo> {
+    info.filter(|i| i.version != skipped_version)
+}
+
 mod http {
     use super::{CURRENT_VERSION, CheckError, MAX_RESPONSE_BYTES};
     use std::ffi::c_void;
@@ -227,6 +232,15 @@ mod tests {
         let info = parse_release(&body, "0.0.1").expect("parse").expect("a release newer than 0.0.1");
         assert!(is_trusted_release_url(&info.url));
         assert!(parse_release(&body, "999.0.0").unwrap().is_none());
+    }
+
+    #[test]
+    fn skipped_versions_are_hidden() {
+        let info = UpdateInfo { version: "0.3.0".into(), url: String::new(), summary: String::new() };
+        assert!(unless_skipped(Some(info.clone()), "").is_some());
+        assert!(unless_skipped(Some(info.clone()), "0.2.0").is_some());
+        assert!(unless_skipped(Some(info), "0.3.0").is_none());
+        assert!(unless_skipped(None, "").is_none());
     }
 
     #[test]

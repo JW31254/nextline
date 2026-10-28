@@ -180,16 +180,10 @@ impl Core {
 
     // ---------------------------------------------------------------- update check
 
-    /// The newest release if it is newer than this build and the user hasn't skipped it.
-    pub fn available_update(&self) -> Option<UpdateInfo> {
-        let info = lock(&self.update).clone()?;
-        (self.data().settings.skipped_version != info.version).then_some(info)
-    }
-
-    pub fn skip_update(&self, version: &str) {
-        self.data().settings.skipped_version = version.to_string();
-        self.mark_dirty();
-        self.repaint();
+    /// The newest release if it is newer than this build and not the version the user skipped.
+    /// Takes the skipped version as an argument because the UI already holds the data lock; locking again would deadlock.
+    pub fn available_update(&self, skipped_version: &str) -> Option<UpdateInfo> {
+        update::unless_skipped(lock(&self.update).clone(), skipped_version)
     }
 
     /// Outcome of the latest check, for the settings screen: (text, is_error).
