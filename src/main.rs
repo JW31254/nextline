@@ -3,6 +3,7 @@
 mod app;
 mod core;
 mod hotkey;
+mod links;
 mod model;
 mod platform;
 mod storage;

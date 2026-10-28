@@ -2,6 +2,11 @@
 
 All notable changes to NextLine. Release notes on GitHub are taken from the matching section below.
 
+## [0.2.1] - 2026-10-28
+
+### Added
+- **About** section in Settings with a link to contact the author on LinkedIn, report an issue and view the source.
+
 ## [0.2.0] - 2026-10-28
 
 ### Added

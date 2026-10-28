@@ -2,6 +2,7 @@
 
 use crate::core::{Core, Source, Status};
 use crate::hotkey::{Combo, HotkeyAction};
+use crate::links;
 use crate::model::{self, AfterKey, AppData, NewlineMode, Script, Settings, Step, ThemeChoice};
 use crate::platform;
 use crate::update;
@@ -1062,6 +1063,18 @@ impl App {
                 } else if let Some((text, is_error)) = self.core.update_message() {
                     ui.label(RichText::new(text).color(if is_error { p.danger } else { p.weak }));
                 }
+
+                ui.separator();
+                ui.label(small_caps(&p, "About"));
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(RichText::new("Questions or ideas?").color(p.weak));
+                    ui.hyperlink_to(format!("{}  Contact me on LinkedIn", icons::LINKEDIN_LOGO), links::CONTACT_URL);
+                });
+                ui.horizontal_wrapped(|ui| {
+                    ui.hyperlink_to(format!("{}  Report an issue", icons::BUG), links::ISSUES_URL);
+                    ui.label(RichText::new("·").color(p.weak));
+                    ui.hyperlink_to(format!("{}  Source code", icons::GITHUB_LOGO), links::SOURCE_URL);
+                });
             });
         self.settings_open = open;
         if !open && self.recording.is_some() {

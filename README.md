@@ -165,6 +165,10 @@ Running copies of NextLine pick the new release up through the update banner.
 
 Issues and pull requests are welcome. Please run `cargo test` before opening a PR.
 
+## Contact
+
+Questions, ideas or want to say hello? [Contact me on LinkedIn](https://www.linkedin.com/in/jack-wicks/) or open an [issue](https://github.com/JW31254/nextline/issues).
+
 ## License
 
 [MIT](LICENSE)
